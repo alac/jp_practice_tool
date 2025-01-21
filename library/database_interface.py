@@ -1,10 +1,10 @@
-import sqlite3
-from pathlib import Path
-import logging
-import argparse
-from typing import List
-import fugashi
 from dataclasses import dataclass
+from pathlib import Path
+from typing import List
+import argparse
+import fugashi
+import logging
+import sqlite3
 
 
 def _initialize_database(db_path: str) -> None:
@@ -99,14 +99,23 @@ def add_kanji_appearances(
     conn: sqlite3.Connection,
     kanji_list: List[str],
     sourcefile_id: int,
-    line_number: int
+    line_number: int,
+    max_appearances: int = 50
 ) -> None:
     try:
         cursor = conn.cursor()
-        cursor.executemany("""
-            INSERT OR IGNORE INTO KanjiAppearances (kanji, sourcefile_id, line_number)
-            VALUES (?, ?, ?)
-        """, [(kanji, sourcefile_id, line_number) for kanji in kanji_list])
+
+        for kanji in kanji_list:
+            cursor.execute("""
+                INSERT OR IGNORE INTO KanjiAppearances (kanji, sourcefile_id, line_number)
+                SELECT ?, ?, ?
+                WHERE (
+                    SELECT COUNT(*)
+                    FROM KanjiAppearances
+                    WHERE kanji = ?
+                ) < ?
+            """, (kanji, sourcefile_id, line_number, kanji, max_appearances))
+
         conn.commit()
     except sqlite3.Error as e:
         print(f"Database error: {e}")
@@ -116,14 +125,23 @@ def add_baseform_appearances(
     conn: sqlite3.Connection,
     baseform_list: List[str],
     sourcefile_id: int,
-    line_number: int
+    line_number: int,
+    max_appearances: int = 20
 ) -> None:
     try:
         cursor = conn.cursor()
-        cursor.executemany("""
-            INSERT OR IGNORE INTO BaseFormAppearances (baseform, sourcefile_id, line_number)
-            VALUES (?, ?, ?)
-        """, [(baseform, sourcefile_id, line_number) for baseform in baseform_list])
+
+        for baseform in baseform_list:
+            cursor.execute("""
+                INSERT OR IGNORE INTO BaseFormAppearances (baseform, sourcefile_id, line_number)
+                SELECT ?, ?, ?
+                WHERE (
+                    SELECT COUNT(*)
+                    FROM BaseFormAppearances
+                    WHERE baseform = ?
+                ) < ?
+            """, (baseform, sourcefile_id, line_number, baseform, max_appearances))
+
         conn.commit()
     except sqlite3.Error as e:
         print(f"Database error: {e}")
@@ -237,7 +255,7 @@ def test() -> None:
     parser.add_argument(
         '--db-path',
         type=str,
-        default="data/japanese_learning.db",
+        default="data/test_db.db",
         help="Path to the SQLite database file."
     )
     args = parser.parse_args()
