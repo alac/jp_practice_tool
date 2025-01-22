@@ -1,7 +1,8 @@
 from pathlib import Path
-import sqlite3
-import fugashi
 import csv
+import fugashi
+import random
+import sqlite3
 
 from library.database_interface import (DATABASE_ROOT, add_baseform_appearances, add_kanji_appearances, add_source_file,
                                         initialize_database, get_db_connection, get_source_file_id)
@@ -111,7 +112,8 @@ def process_chunk(conn: sqlite3.Connection, text: str, filename: str, tagger: fu
                     conn,
                     list(kanji_set),
                     sourcefile_id,
-                    line_idx
+                    line_idx,
+                    max_appearances=50
                 )
 
             if baseform_set:
@@ -119,7 +121,8 @@ def process_chunk(conn: sqlite3.Connection, text: str, filename: str, tagger: fu
                     conn,
                     list(baseform_set),
                     sourcefile_id,
-                    line_idx
+                    line_idx,
+                    max_appearances=50
                 )
 
     except Exception as e:
@@ -172,26 +175,28 @@ def process_all_chunks(db_root_str: str, chunks_root: str) -> None:
     tagger = fugashi.Tagger('-Owakati')
 
     try:
+        file_queue = []
         for folder in chunks_root.iterdir():
             if not folder.is_dir():
                 continue
-
             for file in folder.iterdir():
                 if not file.is_file():
                     continue
-
                 if get_source_file_id(connection, str(file)) != -1:
                     print(f"Skipping already processed file: {file}")
                     continue
+                file_queue.append(file)
+        random.shuffle(file_queue)
 
-                try:
-                    text = read_file_content(file)
-                    print(f"Processing file: {file}")
-                    process_chunk(connection, text, str(file), tagger)
-                    connection.commit()
-                except Exception as e:
-                    print(f"Error processing file {file}: {str(e)}")
-                    connection.rollback()
+        for file in file_queue:
+            try:
+                text = read_file_content(file)
+                print(f"Processing file: {file}")
+                process_chunk(connection, text, str(file), tagger)
+                connection.commit()
+            except Exception as e:
+                print(f"Error processing file {file}: {str(e)}")
+                connection.rollback()
 
     finally:
         connection.close()
