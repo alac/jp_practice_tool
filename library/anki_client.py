@@ -138,9 +138,16 @@ class AnkiConnectClient:
 
         return [CardInfo.from_dict(info) for info in cards_info]
 
-    def get_difficult_cards(self, limit: int, deck_name: Optional[str] = None) -> List[CardInfo]:
+    def get_difficult_cards(
+            self,
+            limit: int,
+            deck_name: Optional[str] = None,
+            reps: int = 30,
+            ease: float = 1.4,
+    ) -> List[CardInfo]:
         """Get cards with low ease factor (indicating difficulty)."""
-        query = "prop:reps>30 prop:due>0 prop:ease<1.4"
+        reps = max(reps, 0)
+        query = f"prop:reps>{reps} prop:due>0 prop:ease<{ease}"
         if deck_name:
             query = f"deck:\"{deck_name}\" {query}"
 
