@@ -1,1 +1,6 @@
-fugashi
+azure-cognitiveservices-speech
+fugashi[unidic]
+google-generativeai
+sseclient-py
+tomli
+unidic

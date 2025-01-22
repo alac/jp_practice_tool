@@ -1,0 +1,43 @@
+# This is the settings file. To override values here, create a user.toml by coping this.
+
+[ai_settings]
+# Oogabooga or Gemini or OpenAI
+api = "Oogabooga"
+
+[oobabooga_api]
+request_url = 'http://127.0.0.1:5000/v1/completions'
+context_length = 4096
+# preset_name should be a oobabooga preset; 'none' will use the defaults hardcoded into library/ai_requests.py
+preset_name = 'none'
+
+[openai_api]
+# supports service that implements a OpenAI-Completions endpoint
+request_url = ""
+model = ""
+api_key = ""
+
+[gemini_pro_api]
+# You can get a free api key here: https://ai.google.dev/gemini-api/docs/api-key
+api_key = ""
+# Pick one of the values from https://ai.google.dev/gemini-api/docs/models/gemini
+# Mind the quota limits if you're using a higher quality model
+api_model = "gemini-1.5-flash"
+system_prompt = """Respond directly with only the requested information.
+Do not add any conversational elements, greetings, or explanations.
+Use examples provided as a guide and follow the pattern to complete the task."""
+
+[azure_tts]
+# Azure has a generous speech synthesis free plan
+# Follow the instructions here to setup an account: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/get-started-text-to-speech?tabs=windows%2Cterminal&pivots=programming-language-python#prerequisites
+speech_key = ""
+speech_region = ""
+# Provided JP voices are:
+#ja-JP-NanamiNeural
+#ja-JP-KeitaNeural
+#ja-JP-AoiNeural
+#ja-JP-DaichiNeural
+#ja-JP-MayuNeural
+#ja-JP-NaokiNeural
+#ja-JP-ShioriNeural
+#ja-JP-MasaruMultilingualNeural
+speech_voice = "ja-JP-KeitaNeural"
