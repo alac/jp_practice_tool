@@ -14,23 +14,23 @@ def chunk_txt_file(input_file: Path, output_dir: Path, chunk_size: int) -> None:
     base_name = input_file.stem
 
     with input_file.open('r', encoding='utf-8') as f:
-        chunk_num = 0
+        lines_seen = 0
         while True:
             lines = []
+            first_line_in_chunk = lines_seen
             for _ in range(chunk_size):
                 line = f.readline()
                 if not line:
                     break
                 lines.append(line)
+                lines_seen += 1
 
             if not lines:
                 break
 
-            chunk_file = output_dir / f"{base_name}.{chunk_num:06d}.txt"
+            chunk_file = output_dir / f"{base_name}.{first_line_in_chunk:06d}.txt"
             with chunk_file.open('w', encoding='utf-8') as out_f:
                 out_f.writelines(lines)
-
-            chunk_num += 1
 
 
 def chunk_tsv_file(input_file: Path, output_dir: Path, chunk_size: int) -> None:
@@ -44,25 +44,27 @@ def chunk_tsv_file(input_file: Path, output_dir: Path, chunk_size: int) -> None:
         if 'Dialogue' not in headers:
             raise ValueError(f"TSV file {input_file} must contain a 'Dialogue' column")
 
-        chunk_num = 0
+        lines_seen = 0
+        first_line_in_chunk = 0
         chunk_lines = []
         output_headers = ['Name', 'Dialogue'] if 'Name' in headers else ['Dialogue']
 
         for row in reader:
             output_row = {h: row.get(h, '') for h in output_headers}
             chunk_lines.append(output_row)
+            lines_seen += 1
 
             if len(chunk_lines) >= chunk_size:
-                chunk_file = output_dir / f"{base_name}.{chunk_num:06d}.tsv"
+                chunk_file = output_dir / f"{base_name}.{first_line_in_chunk:06d}.tsv"
                 with chunk_file.open('w', encoding='utf-8', newline='') as out_f:
                     writer = csv.DictWriter(out_f, fieldnames=output_headers, delimiter='\t')
                     writer.writeheader()
                     writer.writerows(chunk_lines)
+                first_line_in_chunk = lines_seen
                 chunk_lines = []
-                chunk_num += 1
 
         if chunk_lines:
-            chunk_file = output_dir / f"{base_name}.{chunk_num:06d}.tsv"
+            chunk_file = output_dir / f"{base_name}.{first_line_in_chunk:06d}.tsv"
             with chunk_file.open('w', encoding='utf-8', newline='') as out_f:
                 writer = csv.DictWriter(out_f, fieldnames=output_headers, delimiter='\t')
                 writer.writeheader()
