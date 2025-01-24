@@ -161,3 +161,16 @@
     background-color: #0056b3;
     border-color: #0056b3;
 }
+
+.sentence-list li button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #f9f9f9;
+}
+
+.sentence-list li button:hover {
+    background-color: #eee;
+}

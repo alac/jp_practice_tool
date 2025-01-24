@@ -258,7 +258,8 @@ function App() {
                             <ul className="sentence-list">
                                 {sentences.map(sentenceObj => (
                                     <li key={sentenceObj.id}>
-                                        {sentenceObj.sentence} <button>AI Read</button>
+                                        {sentenceObj.sentence}
+                                        <TTSSentenceComponent sentence={sentenceObj.sentence} />
                                     </li>
                                 ))}
                             </ul>
@@ -266,7 +267,6 @@ function App() {
                     )}
                     {currentTab === 'sentence-meaning' && (
                         <div>
-                            {/* Content for Sentence->Meaning tab */}
                             <h4>Sentence->Meaning (Tab Content Stub)</h4>
                             {selectedWord && sentences.length > 0 ? (
                                 <p>Example content for Sentence->Meaning for {selectedWord.word}</p>
@@ -277,14 +277,12 @@ function App() {
                     )}
                     {currentTab === 'word-meaning' && (
                         <div>
-                            {/* Content for Word->Pick correct meaning tab */}
                             <h4>Word->Pick correct meaning (Tab Content Stub)</h4>
                             <p>Content for Word->Pick correct meaning tab</p>
                         </div>
                     )}
                     {currentTab === 'meaning-word' && (
                         <div>
-                            {/* Content for Meaning->Word tab */}
                             <h4>Meaning->Word (Tab Content Stub)</h4>
                             <p>Content for Meaning->Word tab</p>
                         </div>

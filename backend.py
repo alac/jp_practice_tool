@@ -5,6 +5,7 @@ from flask_cors import CORS
 from pathlib import Path
 
 from library.anki_client import AnkiConnectClient
+from library.tts import generate_tts_audio_data
 from model.card_manager import CardManager
 
 ANKI_CONNECT_HOST = "localhost"
@@ -155,10 +156,25 @@ def anki_open():
             break
 
     if card_to_open:
-        anki_client.open_card_browser(card_to_open.note) # Use noteId
+        anki_client.open_card_browser(card_to_open.note)
         return jsonify({"success": "Opened in Anki Browser"})
     else:
         return jsonify({"error": f"Card with id {card_id} not found in current cards"}), 404
+
+
+@app.route('/api/tts', methods=['GET'])
+def tts():
+    sentence = request.args.get('sentence')
+
+    if not sentence:
+        return jsonify({"error": "Sentence is required"}), 400
+
+    audio_base64 = generate_tts_audio_data(sentence)
+
+    if audio_base64:
+        return jsonify({"audio_data": audio_base64})
+    else:
+        return jsonify({"error": "TTS generation failed"}), 50
 
 
 if __name__ == '__main__':
