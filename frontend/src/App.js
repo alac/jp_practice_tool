@@ -5,13 +5,32 @@ function App() {
     const [words, setWords] = useState([]);
     const [selectedWord, setSelectedWord] = useState(null);
     const [sentences, setSentences] = useState([]);
-    const [currentTab, setCurrentTab] = useState('sentences'); // Default tab
+    const [currentTab, setCurrentTab] = useState('sentences');
     const [loadingWords, setLoadingWords] = useState(false);
+
+    // Modal Visibility States
+    const [isRecentModalOpen, setIsRecentModalOpen] = useState(false);
+    const [isDifficultModalOpen, setIsDifficultModalOpen] = useState(false);
+    const [isExactModalOpen, setIsExactModalOpen] = useState(false);
+
+    // Modal Input States - Recent
+    const [recentDaysInput, setRecentDaysInput] = useState('7');
+    const [recentLimitInput, setRecentLimitInput] = useState('10');
+
+    // Modal Input States - Difficult
+    const [difficultLimitInput, setDifficultLimitInput] = useState('100');
+    const [difficultRepsInput, setDifficultRepsInput] = useState('30');
+    const [difficultEaseInput, setDifficultEaseInput] = useState('1.4');
+
+    // Modal Input States - Exact
+    const [exactSearchInput, setExactSearchInput] = useState('');
+    const [exactLimitInput, setExactLimitInput] = useState('5');
+
 
     const fetchWords = async () => {
         setLoadingWords(true);
         try {
-            const response = await fetch('http://localhost:5001/api/words'); // Backend is now on port 5001
+            const response = await fetch('http://localhost:5001/api/words');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -25,7 +44,7 @@ function App() {
     };
 
     useEffect(() => {
-        fetchWords(); // Initial fetch of words
+        fetchWords();
     }, []);
 
     useEffect(() => {
@@ -47,47 +66,88 @@ function App() {
         setCurrentTab(tabName);
     };
 
-    const handleAddRecent = async () => {
-        try {
-            const response = await fetch('http://localhost:5001/api/anki_import_recent');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            await response.json(); // Or handle response data if needed
-            fetchWords(); // Refresh word list after import
-        } catch (error) {
-            console.error("Error importing recent cards:", error);
-        }
-    };
+    // Modal Open/Close Handlers - Recent
+    const openRecentModal = () => setIsRecentModalOpen(true);
+    const closeRecentModal = () => setIsRecentModalOpen(false);
 
-    const handleAddDifficult = async () => {
+    // Modal Open/Close Handlers - Difficult
+    const openDifficultModal = () => setIsDifficultModalOpen(true);
+    const closeDifficultModal = () => setIsDifficultModalOpen(false);
+
+    // Modal Open/Close Handlers - Exact
+    const openExactModal = () => setIsExactModalOpen(true);
+    const closeExactModal = () => setIsExactModalOpen(false);
+
+
+    // Modal Submit Handlers - Recent
+    const submitRecentModal = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/anki_import_difficult');
+            const days = recentDaysInput.trim() === '' ? null : parseInt(recentDaysInput);
+            const limit = recentLimitInput.trim() === '' ? null : parseInt(recentLimitInput);
+            let queryParams = new URLSearchParams();
+            if (days !== null) queryParams.append('days', days);
+            if (limit !== null) queryParams.append('limit', limit);
+
+            const response = await fetch(`http://localhost:5001/api/anki_import_recent?${queryParams.toString()}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             await response.json();
             fetchWords();
+            closeRecentModal();
+        } catch (error) {
+            console.error("Error importing recent cards:", error);
+        }
+    };
+
+    // Modal Submit Handlers - Difficult
+    const submitDifficultModal = async () => {
+        try {
+            const limit = difficultLimitInput.trim() === '' ? null : parseInt(difficultLimitInput);
+            const reps = difficultRepsInput.trim() === '' ? null : parseInt(difficultRepsInput);
+            const ease = difficultEaseInput.trim() === '' ? null : parseFloat(difficultEaseInput);
+            let queryParams = new URLSearchParams();
+            if (limit !== null) queryParams.append('limit', limit);
+            if (reps !== null) queryParams.append('reps', reps);
+            if (ease !== null) queryParams.append('ease', ease);
+
+            const response = await fetch(`http://localhost:5001/api/anki_import_difficult?${queryParams.toString()}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            await response.json();
+            fetchWords();
+            closeDifficultModal();
         } catch (error) {
             console.error("Error importing difficult cards:", error);
         }
     };
 
-    const handleAddWord = async () => {
-        const searchTerm = prompt("Enter word to search in Anki:");
-        if (searchTerm) {
-            try {
-                const response = await fetch(`http://localhost:5001/api/anki_import_exact?search=${encodeURIComponent(searchTerm)}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                await response.json();
-                fetchWords();
-            } catch (error) {
-                console.error("Error importing exact match card:", error);
+    // Modal Submit Handlers - Exact
+    const submitExactModal = async () => {
+        try {
+            const search = exactSearchInput.trim();
+            const limit = exactLimitInput.trim() === '' ? null : parseInt(exactLimitInput);
+            if (!search) {
+                alert("Search term is required for exact match import.");
+                return;
             }
+            let queryParams = new URLSearchParams();
+            queryParams.append('search', search);
+            if (limit !== null) queryParams.append('limit', limit);
+
+            const response = await fetch(`http://localhost:5001/api/anki_import_exact?${queryParams.toString()}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            await response.json();
+            fetchWords();
+            closeExactModal();
+        } catch (error) {
+            console.error("Error importing exact match card:", error);
         }
     };
+
 
     const handleRemoveSelected = async () => {
         if (selectedWord) {
@@ -103,7 +163,7 @@ function App() {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 await response.json();
-                setSelectedWord(null); // Clear selection after removal
+                setSelectedWord(null);
                 fetchWords();
             } catch (error) {
                 console.error("Error removing card:", error);
@@ -120,7 +180,7 @@ function App() {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             await response.json();
-            setSelectedWord(null); // Clear selection after removal
+            setSelectedWord(null);
             fetchWords();
         } catch (error) {
             console.error("Error removing all cards:", error);
@@ -142,7 +202,6 @@ function App() {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 await response.json();
-                alert("Opened in Anki Browser"); // Simple feedback
             } catch (error) {
                 console.error("Error opening in Anki:", error);
             }
@@ -155,9 +214,9 @@ function App() {
             <div className="sidebar">
                 <h3>Word List</h3>
                 <div className="button-group">
-                    <button onClick={handleAddRecent}>Add Recent</button>
-                    <button onClick={handleAddDifficult}>Add Difficult</button>
-                    <button onClick={handleAddWord}>Add Word</button>
+                    <button onClick={openRecentModal}>Add Recent</button>
+                    <button onClick={openDifficultModal}>Add Difficult</button>
+                    <button onClick={openExactModal}>Add Word</button>
                 </div>
                 {loadingWords ? <p>Loading words...</p> : (
                     <ul className="word-list">
@@ -236,6 +295,108 @@ function App() {
                     Status Bar (Placeholder)
                 </div>
             </div>
+
+            {/* Recent Cards Modal */}
+            {isRecentModalOpen && (
+                <div className="modal-backdrop">
+                    <div className="modal-content">
+                        <h3>Add Recent Cards</h3>
+                        <div className="modal-field">
+                            <label htmlFor="recent-days">Days:</label>
+                            <input
+                                type="number"
+                                id="recent-days"
+                                value={recentDaysInput}
+                                onChange={(e) => setRecentDaysInput(e.target.value)}
+                            />
+                        </div>
+                        <div className="modal-field">
+                            <label htmlFor="recent-limit">Limit:</label>
+                            <input
+                                type="number"
+                                id="recent-limit"
+                                value={recentLimitInput}
+                                onChange={(e) => setRecentLimitInput(e.target.value)}
+                            />
+                        </div>
+                        <div className="modal-buttons">
+                            <button onClick={submitRecentModal}>Add</button>
+                            <button onClick={closeRecentModal}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Difficult Cards Modal */}
+            {isDifficultModalOpen && (
+                <div className="modal-backdrop">
+                    <div className="modal-content">
+                        <h3>Add Difficult Cards</h3>
+                        <div className="modal-field">
+                            <label htmlFor="difficult-limit">Limit:</label>
+                            <input
+                                type="number"
+                                id="difficult-limit"
+                                value={difficultLimitInput}
+                                onChange={(e) => setDifficultLimitInput(e.target.value)}
+                            />
+                        </div>
+                        <div className="modal-field">
+                            <label htmlFor="difficult-reps">Reps:</label>
+                            <input
+                                type="number"
+                                id="difficult-reps"
+                                value={difficultRepsInput}
+                                onChange={(e) => setDifficultRepsInput(e.target.value)}
+                            />
+                        </div>
+                        <div className="modal-field">
+                            <label htmlFor="difficult-ease">Ease:</label>
+                            <input
+                                type="number"
+                                id="difficult-ease"
+                                value={difficultEaseInput}
+                                onChange={(e) => setDifficultEaseInput(e.target.value)}
+                            />
+                        </div>
+                        <div className="modal-buttons">
+                            <button onClick={submitDifficultModal}>Add</button>
+                            <button onClick={closeDifficultModal}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Exact Match Card Modal */}
+            {isExactModalOpen && (
+                <div className="modal-backdrop">
+                    <div className="modal-content">
+                        <h3>Add Word</h3>
+                        <div className="modal-field">
+                            <label htmlFor="exact-search">Search Term:</label>
+                            <input
+                                type="text"
+                                id="exact-search"
+                                value={exactSearchInput}
+                                onChange={(e) => setExactSearchInput(e.target.value)}
+                            />
+                        </div>
+                        <div className="modal-field">
+                            <label htmlFor="exact-limit">Limit:</label>
+                            <input
+                                type="number"
+                                id="exact-limit"
+                                value={exactLimitInput}
+                                onChange={(e) => setExactLimitInput(e.target.value)}
+                            />
+                        </div>
+                        <div className="modal-buttons">
+                            <button onClick={submitExactModal}>Add</button>
+                            <button onClick={closeExactModal}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
