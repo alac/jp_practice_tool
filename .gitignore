@@ -167,6 +167,8 @@ cython_debug/
 # react
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+.idea\misc.xml
+
 # dependencies
 frontend/node_modules
 frontend/.pnp
