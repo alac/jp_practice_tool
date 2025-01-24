@@ -1,38 +1,99 @@
 .App {
-  text-align: center;
+    display: flex;
+    height: 100vh; /* Make App take full viewport height */
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.sidebar {
+    width: 250px;
+    background-color: #f0f0f0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.main-view {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.button-group {
+    margin-bottom: 10px;
 }
 
-.App-link {
-  color: #61dafb;
+.button-group button, .tab-bar button, .top-bar button {
+    margin-right: 5px;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.word-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto; /* Make word list scrollable if it's long */
+    flex-grow: 1; /* Allow word list to take up remaining space in sidebar */
+}
+
+.word-list li {
+    padding: 8px 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.word-list li:last-child {
+    border-bottom: none;
+}
+
+.word-list li.selected {
+    background-color: #e0e0e0;
+}
+
+.bottom-buttons {
+    margin-top: 10px;
+}
+
+.tab-bar {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.tab-bar button.active {
+    background-color: #ddd;
+}
+
+.tab-content {
+    flex-grow: 1; /* Allow tab content to take up remaining space */
+    overflow-y: auto; /* Make tab content scrollable if needed */
+    border: 1px solid #ccc;
+    padding: 15px;
+}
+
+.status-bar {
+    background-color: #eee;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+    margin-top: 15px;
+}
+
+.sentence-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sentence-list li {
+    padding: 8px 0;
+    border-bottom: 1px dashed #ccc;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between; /* To align AI Read button to the right */
+    align-items: center; /* Vertically center items */
+}
+
+.sentence-list li:last-child {
+    border-bottom: none;
 }
