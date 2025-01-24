@@ -1,6 +1,6 @@
 import os.path
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pathlib import Path
 
@@ -62,9 +62,9 @@ def get_sentences(word):
 
 @app.route('/api/anki_import_recent', methods=['GET'])
 def anki_import_recent():
-    from flask import request
     days = request.args.get('days', default=7, type=int)
-    recent_failed_cards = anki_client.get_failed_cards(days=days, limit=100)
+    limit = request.args.get('limit', default=10, type=int)
+    recent_failed_cards = anki_client.get_failed_cards(days=days, limit=limit)
     for card in recent_failed_cards:
         card_manager.add_card(card)
 
@@ -73,5 +73,94 @@ def anki_import_recent():
     return jsonify(words_data)
 
 
+@app.route('/api/anki_import_difficult', methods=['GET'])
+def anki_import_difficult():
+    limit = request.args.get('limit', default=100, type=int)
+    reps = request.args.get('reps', default=30, type=int)
+    ease = request.args.get('ease', default=1.4, type=float)
+
+    difficult_cards = anki_client.get_difficult_cards(limit=limit, reps=reps, ease=ease)
+    for card in difficult_cards:
+        card_manager.add_card(card)
+
+    current_cards = card_manager.get_current_cards()
+    words_data = [{"word": card.first_field, "id": card.cardId} for card in current_cards]
+    return jsonify(words_data)
+
+
+@app.route('/api/anki_import_exact', methods=['GET'])
+def anki_import_exact():
+    search = request.args.get('search', type=str)
+    limit = request.args.get('limit', default=100, type=int)
+
+    if not search:
+        return jsonify({"error": "Search term is required"}), 400
+
+    exact_match_cards = anki_client.get_exact_matches_cards(search=search, limit=limit)
+    for card in exact_match_cards:
+        card_manager.add_card(card)
+
+    current_cards = card_manager.get_current_cards()
+    words_data = [{"word": card.first_field, "id": card.cardId} for card in current_cards]
+    return jsonify(words_data)
+
+
+@app.route('/api/remove_card', methods=['POST'])
+def remove_card():
+    data = request.get_json()
+    card_id = data.get('cardId')
+
+    if card_id is None:
+        return jsonify({"error": "cardId is required"}), 400
+
+    card_to_remove = None
+    for card in card_manager.get_current_cards():
+        if card.cardId == card_id:
+            card_to_remove = card
+            break
+
+    if card_to_remove:
+        card_manager.remove_card(card_to_remove)
+    else:
+        return jsonify({"error": f"Card with id {card_id} not found in current cards"}), 404
+
+    current_cards = card_manager.get_current_cards()
+    words_data = [{"word": card.first_field, "id": card.cardId} for card in current_cards]
+    return jsonify(words_data)
+
+
+@app.route('/api/remove_all_cards', methods=['POST'])
+def remove_all_cards():
+    current_cards_copy = list(card_manager.get_current_cards())
+    for card in current_cards_copy:
+        card_manager.remove_card(card)
+
+    current_cards = card_manager.get_current_cards()
+    words_data = [{"word": card.first_field, "id": card.cardId} for card in current_cards]
+    return jsonify(words_data)
+
+
+@app.route('/api/anki_open', methods=['POST'])
+def anki_open():
+    data = request.get_json()
+    card_id = data.get('cardId')
+
+    if card_id is None:
+        return jsonify({"error": "cardId is required"}), 400
+
+    card_to_open = None
+    for card in card_manager.get_current_cards():
+        if card.cardId == card_id:
+            card_to_open = card
+            break
+
+    if card_to_open:
+        anki_client.open_card_browser(card_to_open.note) # Use noteId
+        return jsonify({"success": "Opened in Anki Browser"})
+    else:
+        return jsonify({"error": f"Card with id {card_id} not found in current cards"}), 404
+
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5001) # Run Flask app on port 5000
+    app.run(debug=True, port=5001)
+
