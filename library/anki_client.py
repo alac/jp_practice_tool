@@ -164,6 +164,29 @@ class AnkiConnectClient:
 
         return [CardInfo.from_dict(info) for info in cards_info]
 
+    def get_exact_matches_cards(
+            self,
+            search: str,
+            limit: int,
+            deck_name: Optional[str] = None,
+    ) -> List[CardInfo]:
+        query = f"*:\"{search}\""
+        if deck_name:
+            query = f"deck:\"{deck_name}\" {query}"
+
+        card_ids = self._invoke(
+            "findCards",
+            query=query
+        )
+
+        card_ids = card_ids[:limit]
+        cards_info = self._invoke(
+            "cardsInfo",
+            cards=card_ids
+        )
+
+        return [CardInfo.from_dict(info) for info in cards_info]
+
     def open_card_browser(self, note_id: int) -> None:
         """Open the card browser focused on a specific card."""
         self._invoke(
