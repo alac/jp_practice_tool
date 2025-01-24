@@ -6,20 +6,36 @@ function App() {
     const [selectedWord, setSelectedWord] = useState(null);
     const [sentences, setSentences] = useState([]);
     const [currentTab, setCurrentTab] = useState('sentences'); // Default tab
+    const [loadingWords, setLoadingWords] = useState(false);
+
+    const fetchWords = async () => {
+        setLoadingWords(true);
+        try {
+            const response = await fetch('http://localhost:5001/api/words'); // Backend is now on port 5001
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            setWords(data);
+        } catch (error) {
+            console.error("Could not fetch words:", error);
+        } finally {
+            setLoadingWords(false);
+        }
+    };
 
     useEffect(() => {
-        fetch('http://localhost:5001/api/words') // Fetch words from backend
-            .then(response => response.json())
-            .then(data => setWords(data));
+        fetchWords(); // Initial fetch of words
     }, []);
 
     useEffect(() => {
         if (selectedWord) {
-            fetch('http://localhost:5001/api/sentences/${selectedWord.word}') // Fetch sentences for selected word
+            fetch(`http://localhost:5001/api/sentences/${selectedWord.word}`)
                 .then(response => response.json())
-                .then(data => setSentences(data));
+                .then(data => setSentences(data))
+                .catch(error => console.error("Could not fetch sentences:", error));
         } else {
-            setSentences([]); // Clear sentences if no word selected
+            setSentences([]);
         }
     }, [selectedWord]);
 
@@ -31,31 +47,136 @@ function App() {
         setCurrentTab(tabName);
     };
 
-    console.log(words)
+    const handleAddRecent = async () => {
+        try {
+            const response = await fetch('http://localhost:5001/api/anki_import_recent');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            await response.json(); // Or handle response data if needed
+            fetchWords(); // Refresh word list after import
+        } catch (error) {
+            console.error("Error importing recent cards:", error);
+        }
+    };
+
+    const handleAddDifficult = async () => {
+        try {
+            const response = await fetch('http://localhost:5001/api/anki_import_difficult');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            await response.json();
+            fetchWords();
+        } catch (error) {
+            console.error("Error importing difficult cards:", error);
+        }
+    };
+
+    const handleAddWord = async () => {
+        const searchTerm = prompt("Enter word to search in Anki:");
+        if (searchTerm) {
+            try {
+                const response = await fetch(`http://localhost:5001/api/anki_import_exact?search=${encodeURIComponent(searchTerm)}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                await response.json();
+                fetchWords();
+            } catch (error) {
+                console.error("Error importing exact match card:", error);
+            }
+        }
+    };
+
+    const handleRemoveSelected = async () => {
+        if (selectedWord) {
+            try {
+                const response = await fetch('http://localhost:5001/api/remove_card', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ cardId: selectedWord.id }),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                await response.json();
+                setSelectedWord(null); // Clear selection after removal
+                fetchWords();
+            } catch (error) {
+                console.error("Error removing card:", error);
+            }
+        }
+    };
+
+    const handleRemoveAll = async () => {
+        try {
+            const response = await fetch('http://localhost:5001/api/remove_all_cards', {
+                method: 'POST',
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            await response.json();
+            setSelectedWord(null); // Clear selection after removal
+            fetchWords();
+        } catch (error) {
+            console.error("Error removing all cards:", error);
+        }
+    };
+
+
+    const handleOpenInAnki = async () => {
+        if (selectedWord) {
+            try {
+                const response = await fetch('http://localhost:5001/api/anki_open', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ cardId: selectedWord.id }),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                await response.json();
+                alert("Opened in Anki Browser"); // Simple feedback
+            } catch (error) {
+                console.error("Error opening in Anki:", error);
+            }
+        }
+    };
+
 
     return (
         <div className="App">
             <div className="sidebar">
                 <h3>Word List</h3>
                 <div className="button-group">
-                    <button>Add Recent</button>
-                    <button>Add Difficult</button>
-                    <button>Add Word</button>
+                    <button onClick={handleAddRecent}>Add Recent</button>
+                    <button onClick={handleAddDifficult}>Add Difficult</button>
+                    <button onClick={handleAddWord}>Add Word</button>
                 </div>
-                <ul className="word-list">
-                    {words.map(word => (
-                        <li
-                            key={word.id}
-                            className={selectedWord && selectedWord.id === word.id ? 'selected' : ''}
-                            onClick={() => handleWordSelect(word)}
-                        >
-                            {word.word}
-                        </li>
-                    ))}
-                </ul>
+                {loadingWords ? <p>Loading words...</p> : (
+                    <ul className="word-list">
+                        {words.map(word => (
+                            <li
+                                key={word.id}
+                                className={selectedWord && selectedWord.id === word.id ? 'selected' : ''}
+                                onClick={() => handleWordSelect(word)}
+                            >
+                                {word.word}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+
                 <div className="button-group bottom-buttons">
-                    <button disabled={!selectedWord}>Remove Selected</button>
-                    <button disabled={!selectedWord}>Open in Anki</button>
+                    <button onClick={handleRemoveSelected} disabled={!selectedWord}>Remove Selected</button>
+                    <button onClick={handleRemoveAll}>Remove All</button>
+                    <button onClick={handleOpenInAnki} disabled={!selectedWord}>Open in Anki</button>
                 </div>
             </div>
 
