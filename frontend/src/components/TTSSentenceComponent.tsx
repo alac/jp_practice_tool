@@ -1,13 +1,13 @@
 import React, { useState, useRef, useContext } from "react";
-import { BaseURLContext } from "../contexts/BaseURLContext";
+import { BaseURLContext } from "../context/BaseURLContext";
 
-const TTSSentenceComponent = ({ sentence }) => {
+const TTSSentenceComponent = ({ sentence }: { sentence: string }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const baseURL = useContext(BaseURLContext);
 
   const handlePlay = async () => {
-    if (isPlaying) {
+    if (isPlaying && audioRef?.current) {
       audioRef.current.pause();
       setIsPlaying(false);
       return;
@@ -50,9 +50,9 @@ const TTSSentenceComponent = ({ sentence }) => {
   };
 
   // Utility function to convert base64 string to Blob
-  const base64toBlob = (base64Data, contentType = "audio/wav") => {
+  const base64toBlob = (base64Data: string, contentType = "audio/wav") => {
     const byteCharacters = atob(base64Data);
-    const byteArrays = [];
+    const byteArrays: Uint8Array[] = [];
     for (let offset = 0; offset < byteCharacters.length; offset += 512) {
       const slice = byteCharacters.slice(offset, offset + 512);
       const byteNumbers = new Array(slice.length);

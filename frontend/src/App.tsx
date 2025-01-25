@@ -1,34 +1,51 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "./App.css";
-import { BaseURLContext, BASE_URL } from "./contexts/BaseURLContext";
+import { BaseURLContext } from "./context/BaseURLContext";
+import TabModeSentencesComponent from "./components/TabModeSentencesComponent";
+import { type } from "os";
+
+interface Word {
+  word: string;
+  id: number;
+}
+
+type TabType =
+  | "sentences"
+  | "sentence-meaning"
+  | "word-meaning"
+  | "meaning-word";
 
 function App() {
-  const [words, setWords] = useState([]);
-  const [selectedWord, setSelectedWord] = useState(null);
-  const [loadingWords, setLoadingWords] = useState(false);
+  const baseURL = useContext(BaseURLContext);
+
+  const [words, setWords] = useState<Word[]>([]);
+  const [selectedWord, setSelectedWord] = useState<Word | null>(null);
+  const [currentTab, setCurrentTab] = useState<TabType>("sentences");
+  const [loadingWords, setLoadingWords] = useState<boolean>(false);
 
   // Modal Visibility States
-  const [isRecentModalOpen, setIsRecentModalOpen] = useState(false);
-  const [isDifficultModalOpen, setIsDifficultModalOpen] = useState(false);
-  const [isExactModalOpen, setIsExactModalOpen] = useState(false);
+  const [isRecentModalOpen, setIsRecentModalOpen] = useState<boolean>(false);
+  const [isDifficultModalOpen, setIsDifficultModalOpen] =
+    useState<boolean>(false);
+  const [isExactModalOpen, setIsExactModalOpen] = useState<boolean>(false);
 
   // Modal Input States
-  const [recentDaysInput, setRecentDaysInput] = useState("7");
-  const [recentLimitInput, setRecentLimitInput] = useState("10");
-  const [difficultLimitInput, setDifficultLimitInput] = useState("100");
-  const [difficultRepsInput, setDifficultRepsInput] = useState("30");
-  const [difficultEaseInput, setDifficultEaseInput] = useState("1.4");
-  const [exactSearchInput, setExactSearchInput] = useState("");
-  const [exactLimitInput, setExactLimitInput] = useState("100");
+  const [recentDaysInput, setRecentDaysInput] = useState<string>("7");
+  const [recentLimitInput, setRecentLimitInput] = useState<string>("10");
+  const [difficultLimitInput, setDifficultLimitInput] = useState<string>("100");
+  const [difficultRepsInput, setDifficultRepsInput] = useState<string>("30");
+  const [difficultEaseInput, setDifficultEaseInput] = useState<string>("1.4");
+  const [exactSearchInput, setExactSearchInput] = useState<string>("");
+  const [exactLimitInput, setExactLimitInput] = useState<string>("100");
 
   const fetchWords = async () => {
     setLoadingWords(true);
     try {
-      const response = await fetch(`${BASE_URL}/api/words`);
+      const response = await fetch(`${baseURL}/api/words`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const data = await response.json();
+      const data: Word[] = await response.json();
       setWords(data);
     } catch (error) {
       console.error("Could not fetch words:", error);
@@ -41,11 +58,11 @@ function App() {
     fetchWords();
   }, []);
 
-  const handleWordSelect = (word) => {
+  const handleWordSelect = (word: Word) => {
     setSelectedWord(word);
   };
 
-  const handleTabChange = (tabName) => {
+  const handleTabChange = (tabName: TabType) => {
     setCurrentTab(tabName);
   };
 
@@ -65,11 +82,11 @@ function App() {
       const limit =
         recentLimitInput.trim() === "" ? null : parseInt(recentLimitInput);
       let queryParams = new URLSearchParams();
-      if (days !== null) queryParams.append("days", days);
-      if (limit !== null) queryParams.append("limit", limit);
+      if (days !== null) queryParams.append("days", `${days}`);
+      if (limit !== null) queryParams.append("limit", `${limit}`);
 
       const response = await fetch(
-        `${BASE_URL}/api/anki_import_recent?${queryParams.toString()}`
+        `${baseURL}/api/anki_import_recent?${queryParams.toString()}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -96,12 +113,12 @@ function App() {
           ? null
           : parseFloat(difficultEaseInput);
       let queryParams = new URLSearchParams();
-      if (limit !== null) queryParams.append("limit", limit);
-      if (reps !== null) queryParams.append("reps", reps);
-      if (ease !== null) queryParams.append("ease", ease);
+      if (limit !== null) queryParams.append("limit", `${limit}`);
+      if (reps !== null) queryParams.append("reps", `${reps}`);
+      if (ease !== null) queryParams.append("ease", `${ease}`);
 
       const response = await fetch(
-        `${BASE_URL}/api/anki_import_difficult?${queryParams.toString()}`
+        `${baseURL}/api/anki_import_difficult?${queryParams.toString()}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -126,10 +143,10 @@ function App() {
       }
       let queryParams = new URLSearchParams();
       queryParams.append("search", search);
-      if (limit !== null) queryParams.append("limit", limit);
+      if (limit !== null) queryParams.append("limit", `${limit}`);
 
       const response = await fetch(
-        `${BASE_URL}/api/anki_import_exact?${queryParams.toString()}`
+        `${baseURL}/api/anki_import_exact?${queryParams.toString()}`
       );
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -145,7 +162,7 @@ function App() {
   const handleRemoveSelected = async () => {
     if (selectedWord) {
       try {
-        const response = await fetch(`${BASE_URL}/api/remove_card`, {
+        const response = await fetch(`${baseURL}/api/remove_card`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -166,7 +183,7 @@ function App() {
 
   const handleRemoveAll = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/api/remove_all_cards`, {
+      const response = await fetch(`${baseURL}/api/remove_all_cards`, {
         method: "POST",
       });
       if (!response.ok) {
@@ -183,7 +200,7 @@ function App() {
   const handleOpenInAnki = async () => {
     if (selectedWord) {
       try {
-        const response = await fetch(`${BASE_URL}/api/anki_open`, {
+        const response = await fetch(`${baseURL}/api/anki_open`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -202,7 +219,7 @@ function App() {
   };
 
   return (
-    <BaseURLContext.Provider value={BASE_URL}>
+    <BaseURLContext.Provider value={baseURL}>
       <div className="App">
         <div className="sidebar">
           <h3>Word List</h3>
@@ -275,10 +292,10 @@ function App() {
           </div>
 
           <div className="tab-content">
-            {currentTab === "sentences" && (
+            {currentTab === "sentences" && selectedWord && (
               <TabModeSentencesComponent selectedWord={selectedWord} />
             )}
-            {currentTab === "sentence-meaning" && (
+            {currentTab === "sentence-meaning" && selectedWord && (
               <div>
                 <h4>Sentence-&gt;Meaning (Tab Content Stub)</h4>
                 {selectedWord && words.length > 0 ? (
@@ -291,13 +308,13 @@ function App() {
                 )}
               </div>
             )}
-            {currentTab === "word-meaning" && (
+            {currentTab === "word-meaning" && selectedWord && (
               <div>
                 <h4>Word-&gt;Pick correct meaning (Tab Content Stub)</h4>
                 <p>Content for Word-&gt;Pick correct meaning tab</p>
               </div>
             )}
-            {currentTab === "meaning-word" && (
+            {currentTab === "meaning-word" && selectedWord && (
               <div>
                 <h4>Meaning-&gt;Word (Tab Content Stub)</h4>
                 <p>Content for Meaning-&gt;Word tab</p>
@@ -415,3 +432,4 @@ function App() {
 }
 
 export default App;
+export type { Word };

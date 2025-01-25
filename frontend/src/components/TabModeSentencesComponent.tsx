@@ -1,9 +1,19 @@
 import React, { useState, useEffect, useContext } from "react";
 import TTSSentenceComponent from "./TTSSentenceComponent";
-import { BaseURLContext } from "../contexts/BaseURLContext";
+import { BaseURLContext } from "../context/BaseURLContext";
+import { Word } from "../App";
 
-const TabModeSentencesComponent = ({ selectedWord }) => {
-  const [sentences, setSentences] = useState([]);
+interface Sentence {
+  sentence: string;
+  id: number;
+}
+
+const TabModeSentencesComponent = ({
+  selectedWord,
+}: {
+  selectedWord: Word;
+}) => {
+  const [sentences, setSentences] = useState<Sentence[]>([]);
   const baseURL = useContext(BaseURLContext);
 
   useEffect(() => {
