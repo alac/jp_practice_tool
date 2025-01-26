@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List
 import fugashi
 
+from library.chunk_reader import read_file_content
 from library.database_interface import DATABASE_ROOT, get_db_connection, get_source_locations_for_baseform, get_baseform
 
 
@@ -42,6 +43,8 @@ def get_examples_for_word(
             continue
 
         sentences, example_line_index = _extract_context_sentences(Path(file_path), location.line_number)
+        if any([len(s) > 200 for s in sentences]):
+            continue
         if sentences:
             examples.append(Example(
                 filename=location.filename,
@@ -75,23 +78,18 @@ def _extract_context_sentences(
         Returns ([], -1) if the file reading or line extraction fails.
     """
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            all_lines = f.readlines()
+        all_lines = read_file_content(file_path)
+        target_line_index_file_indexed = line_number
+        start_index = max(0, target_line_index_file_indexed - context_lines_before)
+        end_index = min(len(all_lines), target_line_index_file_indexed + context_lines_after + 1)
 
-            if str(file_path).endswith(".tsv"):
-                all_lines = all_lines[1:]
+        sentences = [line.strip() for line in all_lines[start_index:end_index]]
+        example_line_index = target_line_index_file_indexed - start_index
 
-            target_line_index_file_indexed = line_number
-            start_index = max(0, target_line_index_file_indexed - context_lines_before)
-            end_index = min(len(all_lines), target_line_index_file_indexed + context_lines_after + 1)
+        if not (0 <= example_line_index < len(sentences)):
+            return [], -1
 
-            sentences = [line.strip() for line in all_lines[start_index:end_index]]
-            example_line_index = target_line_index_file_indexed - start_index
-
-            if not (0 <= example_line_index < len(sentences)):
-                return [], -1
-
-            return sentences, example_line_index
+        return sentences, example_line_index
 
     except FileNotFoundError:
         print(f"Error: File not found: {file_path}")
