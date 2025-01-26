@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext } from "react";
+import React, { useState, useRef, useContext, useEffect } from "react";
 import { BaseURLContext } from "../context/BaseURLContext";
 
 const TTSSentenceComponent = ({ sentence }: { sentence: string }) => {
@@ -6,8 +6,24 @@ const TTSSentenceComponent = ({ sentence }: { sentence: string }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const baseURL = useContext(BaseURLContext);
 
+  useEffect(() => {
+    const currentAudio = audioRef.current;
+
+    if (currentAudio) {
+      currentAudio.onended = () => {
+        setIsPlaying(false);
+      };
+    }
+
+    return () => {
+      if (currentAudio) {
+        currentAudio.onended = null;
+      }
+    };
+  }, []);
+
   const handlePlay = async () => {
-    if (isPlaying && audioRef?.current) {
+    if (isPlaying && audioRef.current) {
       audioRef.current.pause();
       setIsPlaying(false);
       return;
@@ -27,22 +43,23 @@ const TTSSentenceComponent = ({ sentence }: { sentence: string }) => {
         return;
       }
 
-      const audioBlob = base64toBlob(base64Audio, "audio/wav"); // Assuming WAV format from Azure
+      const audioBlob = base64toBlob(base64Audio, "audio/wav");
       const audioURL = URL.createObjectURL(audioBlob);
 
       if (!audioRef.current) {
         audioRef.current = new Audio(audioURL);
-        audioRef.current.onended = () => {
-          setIsPlaying(false);
-          URL.revokeObjectURL(audioURL);
-          audioRef.current = null;
-        };
       } else {
         audioRef.current.src = audioURL;
+        audioRef.current.load();
       }
 
       setIsPlaying(true);
       await audioRef.current.play();
+
+      audioRef.current.onended = () => {
+        setIsPlaying(false);
+        URL.revokeObjectURL(audioURL);
+      };
     } catch (error) {
       console.error("Error fetching or playing TTS:", error);
       setIsPlaying(false);
