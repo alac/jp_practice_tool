@@ -218,6 +218,13 @@ function App() {
     }
   };
 
+  const handleNextWord = () => {
+    if (words.length > 0) {
+      const randomIndex = Math.floor(Math.random() * words.length);
+      setSelectedWord(words[randomIndex]);
+    }
+  };
+
   return (
     <BaseURLContext.Provider value={baseURL}>
       <div className="App">
@@ -261,7 +268,7 @@ function App() {
 
         <div className="main-view">
           <div className="top-bar">
-            <button>Next</button>
+            <button onClick={handleNextWord}>Next</button>
             <button>AI History</button>
           </div>
           <div className="tab-bar">
