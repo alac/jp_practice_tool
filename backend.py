@@ -93,7 +93,6 @@ def anki_import_difficult():
 def anki_import_exact():
     search = request.args.get('search', type=str)
     limit = request.args.get('limit', default=100, type=int)
-
     if not search:
         return jsonify({"error": "Search term is required"}), 400
 
@@ -110,7 +109,6 @@ def anki_import_exact():
 def remove_card():
     data = request.get_json()
     card_id = data.get('cardId')
-
     if card_id is None:
         return jsonify({"error": "cardId is required"}), 400
 
@@ -145,7 +143,6 @@ def remove_all_cards():
 def anki_open():
     data = request.get_json()
     card_id = data.get('cardId')
-
     if card_id is None:
         return jsonify({"error": "cardId is required"}), 400
 
@@ -165,12 +162,10 @@ def anki_open():
 @app.route('/api/tts', methods=['GET'])
 def tts():
     sentence = request.args.get('sentence')
-
     if not sentence:
         return jsonify({"error": "Sentence is required"}), 400
 
     audio_base64 = generate_tts_audio_data(sentence)
-
     if audio_base64:
         return jsonify({"audio_data": audio_base64})
     else:
@@ -179,4 +174,3 @@ def tts():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
-
