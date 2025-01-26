@@ -4,8 +4,10 @@ import { BaseURLContext } from "../context/BaseURLContext";
 import { Word } from "../App";
 
 interface Sentence {
-  sentence: string;
-  id: number;
+  filename: string;
+  line_number: number;
+  sentences: string[];
+  example_line: number;
 }
 
 const TabModeSentencesComponent = ({
@@ -21,15 +23,16 @@ const TabModeSentencesComponent = ({
       const fetchSentences = async () => {
         try {
           const response = await fetch(
-            `${baseURL}/api/sentences/${selectedWord.word}`
+            `${baseURL}/api/examples/${selectedWord.word}`
           );
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           const data = await response.json();
-          setSentences(data);
+          const shuffledData = [...data].sort(() => Math.random() - 0.5);
+          setSentences(shuffledData);
         } catch (error) {
-          console.error("Could not fetch sentences:", error);
+          console.error("Could not fetch examples:", error);
         }
       };
       fetchSentences();
@@ -39,15 +42,31 @@ const TabModeSentencesComponent = ({
   }, [selectedWord, baseURL]);
 
   return (
-    <div>
+    <div className="tab-mode-sentences">
       <h4>
         Sentences for {selectedWord ? selectedWord.word : "Select a word"}
       </h4>
       <ul className="sentence-list">
-        {sentences.map((sentenceObj) => (
-          <li key={sentenceObj.id}>
-            {sentenceObj.sentence}
-            <TTSSentenceComponent sentence={sentenceObj.sentence} />
+        {sentences.map((example, index) => (
+          <li key={index} className="example-block">
+            <h5 className="example-title">
+              File: {example.filename}, Line: {example.line_number}
+            </h5>
+            <div className="sentences-container">
+              {example.sentences.map((sentence, sentenceIndex) => (
+                <div
+                  key={sentenceIndex}
+                  className={`sentence-item ${
+                    sentenceIndex === example.example_line
+                      ? "example-sentence"
+                      : ""
+                  }`}
+                >
+                  <TTSSentenceComponent sentence={sentence} />
+                  <span className="sentence-text">{sentence}</span>
+                </div>
+              ))}
+            </div>
           </li>
         ))}
       </ul>

@@ -162,15 +162,75 @@
     border-color: #0056b3;
 }
 
-.sentence-list li button {
-    margin-left: 10px;
-    padding: 5px 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    cursor: pointer;
-    background-color: #f9f9f9;
+/* New Styles for TabModeSentencesComponent */
+.tab-mode-sentences .sentence-list {
+  list-style: none;
+  padding: 0;
 }
 
-.sentence-list li button:hover {
-    background-color: #eee;
+.tab-mode-sentences .example-block {
+  margin-bottom: 15px;
+  padding: 0; /* Minimalist: No padding on block */
+  border: none; /* Minimalist: No border on block */
+  background-color: transparent; /* Minimalist: Transparent background */
+}
+
+.tab-mode-sentences .example-title {
+  font-size: 1em;
+  font-style: italic;
+  font-weight: normal;
+  margin-bottom: 5px; /* Minimalist: Reduced margin */
+  display: block; /* IMPORTANT: Ensure title is a block element */
+}
+
+.tab-mode-sentences .sentences-container {
+  /* Styles for sentences container if needed */
+}
+
+.tab-mode-sentences .sentence-item {
+  display: flex; /* Flex to align TTS and text */
+  align-items: center; /* Vertically center items */
+  margin-bottom: 2px; /* Minimalist: Reduced margin between sentences */
+  padding: 0; /* Minimalist: No padding on sentence item */
+  background-color: transparent; /* Minimalist: Transparent background */
+  border: none; /* Minimalist: No border on sentence item */
+}
+
+.tab-mode-sentences .sentence-item:last-child {
+  margin-bottom: 0;
+}
+
+.tab-mode-sentences .sentence-text {
+  margin-left: 5px;
+}
+
+.tab-mode-sentences .example-sentence {
+  font-weight: bold;
+  background-color: lightyellow;
+  padding: 2px;
+}
+
+.tab-mode-sentences .example-block {
+  border: none;
+  padding: 0;
+  margin-bottom: 15px;
+  background-color: transparent;
+}
+
+.tab-mode-sentences .example-title {
+  font-size: 1em;
+  font-style: italic;
+  font-weight: normal;
+  margin-bottom: 5px;
+}
+
+.tab-mode-sentences .sentence-item {
+  margin-bottom: 2px;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+}
+
+.tab-mode-sentences .example-block {
+  display: block;
 }

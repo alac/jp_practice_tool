@@ -5,7 +5,9 @@ from flask_cors import CORS
 from pathlib import Path
 
 from library.anki_client import AnkiConnectClient
+from library.database_interface import DATABASE_ROOT
 from library.tts import generate_tts_audio_data
+from library.grab_examples import get_examples_for_word
 from model.card_manager import CardManager
 
 ANKI_CONNECT_HOST = "localhost"
@@ -26,39 +28,18 @@ def get_words():
     return jsonify(words_data)
 
 
-@app.route('/api/sentences/<word>', methods=['GET'])
-def get_sentences(word):
-    dummy_sentences = {
-        "言葉": [
-            {"sentence": "これは言葉の例です。", "id": 101},
-            {"sentence": "言葉はコミュニケーションの基本です。", "id": 102},
-            {"sentence": "美しい言葉を使いましょう。", "id": 103},
-        ],
-        "勉強": [
-            {"sentence": "毎日勉強するのは大変です。", "id": 201},
-            {"sentence": "日本語の勉強は楽しいです。", "id": 202},
-            {"sentence": "勉強すればするほど賢くなります。", "id": 203},
-        ],
-        "難しい": [
-            {"sentence": "この問題は難しいですね。", "id": 301},
-            {"sentence": "難しい漢字はたくさんあります。", "id": 302},
-            {"sentence": "難しい決断を迫られています。", "id": 303},
-        ],
-        "例": [
-            {"sentence": "例を挙げてください。", "id": 401},
-            {"sentence": "例としてこれを考えてみましょう。", "id": 402},
-            {"sentence": "例はたくさんありますが、一つだけ挙げます。", "id": 403},
-        ],
-        "文章": [
-            {"sentence": "この文章は理解しやすいです。", "id": 501},
-            {"sentence": "文章を書くのは難しいです。", "id": 502},
-            {"sentence": "長い文章を読むのは疲れます。", "id": 503},
-        ],
-    }
-    if word in dummy_sentences:
-        return jsonify(dummy_sentences[word])
-    else:
-        return jsonify([])
+@app.route('/api/examples/<word>', methods=['GET'])
+def get_examples(word):
+    examples = get_examples_for_word(word, DATABASE_ROOT)
+    examples_data = []
+    for example in examples:
+        examples_data.append({
+            "filename": example.filename,
+            "line_number": example.line_number,
+            "sentences": example.sentences,
+            "example_line": example.example_line
+        })
+    return jsonify(examples_data)
 
 
 @app.route('/api/anki_import_recent', methods=['GET'])
