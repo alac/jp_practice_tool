@@ -4,24 +4,24 @@ import hashlib
 from pathlib import Path
 import logging
 from library.settings_manager import settings
+import unicodedata
 
 
 AUDIO_CACHE_DIR = Path("data") / "audio"
 AUDIO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def generate_filename(sentence: str) -> str:
-    """Generates a filename based on sentence and hash."""
-    sentence_prefix = sentence[:20].strip()
-    if not sentence_prefix:
-        sentence_prefix = "empty_sentence"
-    else:
-        sentence_prefix = (sentence_prefix.replace(" ", "_")
-                           .replace("/", "_")
-                           .replace("\\", "_"))
+def generate_filename(sentence):
+    sentence_hash = hashlib.md5(sentence.encode('utf-8')).hexdigest()
+    sanitized_chars = []
+    for char in sentence_hash:
+        category = unicodedata.category(char)
+        if category.startswith('L') or category.startswith('N') or char.isalnum(): # Keep Letters, Numbers, and Alphanumeric (for safety)
+            sanitized_chars.append(char)
+        else:
+            sanitized_chars.append('_') # Replace other chars with underscore
 
-    sentence_hash = hashlib.sha256(sentence.encode('utf-8')).hexdigest()[:8] # 8 char hash
-    filename = f"{sentence_prefix}_{sentence_hash}"
+    filename = "".join(sanitized_chars)[:50]  # Limit length as before
     return filename
 
 
@@ -52,7 +52,7 @@ def generate_tts_audio_data(sentence):
     speech_config.speech_synthesis_voice_name = settings.get_setting('azure_tts.speech_voice')
     audio_config = speechsdk.audio.AudioOutputConfig(filename=str(audio_cache_file))
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)
-    speech_synthesis_result = speech_synthesizer.synthesize_speech(sentence)
+    speech_synthesis_result = speech_synthesizer.speak_text(sentence)
 
     if speech_synthesis_result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
         try:
