@@ -1,165 +1,167 @@
 .App {
-    display: flex;
-    height: 100vh; /* Make App take full viewport height */
+  display: flex;
+  height: 100vh; /* Make App take full viewport height */
 }
 
 .sidebar {
-    width: 250px;
-    background-color: #f0f0f0;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
+  width: 250px;
+  background-color: #f0f0f0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .main-view {
-    flex: 1;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .button-group {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
-.button-group button, .tab-bar button, .top-bar button {
-    margin-right: 5px;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    cursor: pointer;
+.button-group button,
+.tab-bar button,
+.top-bar button {
+  margin-right: 5px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .word-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    overflow-y: auto; /* Make word list scrollable if it's long */
-    flex-grow: 1; /* Allow word list to take up remaining space in sidebar */
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto; /* Make word list scrollable if it's long */
+  flex-grow: 1; /* Allow word list to take up remaining space in sidebar */
 }
 
 .word-list li {
-    padding: 8px 10px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
+  padding: 8px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
 }
 
 .word-list li:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .word-list li.selected {
-    background-color: #e0e0e0;
+  background-color: #e0e0e0;
 }
 
 .bottom-buttons {
-    margin-top: 10px;
+  margin-top: 10px;
 }
 
 .tab-bar {
-    margin-top: 15px;
-    margin-bottom: 15px;
+  margin-top: 15px;
+  margin-bottom: 15px;
 }
 
 .tab-bar button.active {
-    background-color: #ddd;
+  background-color: #ddd;
 }
 
 .tab-content {
-    flex-grow: 1; /* Allow tab content to take up remaining space */
-    overflow-y: auto; /* Make tab content scrollable if needed */
-    border: 1px solid #ccc;
-    padding: 15px;
+  flex-grow: 1; /* Allow tab content to take up remaining space */
+  overflow-y: auto; /* Make tab content scrollable if needed */
+  border: 1px solid #ccc;
+  padding: 15px;
 }
 
 .status-bar {
-    background-color: #eee;
-    padding: 10px;
-    border-top: 1px solid #ccc;
-    margin-top: 15px;
+  background-color: #eee;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+  margin-top: 15px;
 }
 
 .sentence-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .sentence-list li {
-    padding: 8px 0;
-    border-bottom: 1px dashed #ccc;
-    margin-bottom: 8px;
-    display: flex;
-    justify-content: space-between; /* To align AI Read button to the right */
-    align-items: center; /* Vertically center items */
+  padding: 8px 0;
+  border-bottom: 1px dashed #ccc;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between; /* To align AI Read button to the right */
+  align-items: center; /* Vertically center items */
 }
 
 .sentence-list li:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black backdrop */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000; /* Ensure modal is on top */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black backdrop */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure modal is on top */
 }
 
 .modal-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 400px; /* Adjust width as needed */
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 400px; /* Adjust width as needed */
 }
 
 .modal-field {
-    margin-bottom: 15px;
+  margin-bottom: 15px;
 }
 
 .modal-field label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
 }
 
 .modal-field input[type="text"],
 .modal-field input[type="number"] {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* Ensure padding is included in width */
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box; /* Ensure padding is included in width */
 }
 
 .modal-buttons {
-    display: flex;
-    justify-content: flex-end;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .modal-buttons button {
-    margin-left: 10px;
-    padding: 8px 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    cursor: pointer;
+  margin-left: 10px;
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .modal-buttons button:first-child {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
 }
 
 .modal-buttons button:first-child:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
+  background-color: #0056b3;
+  border-color: #0056b3;
 }
 
 /* New Styles for TabModeSentencesComponent */
