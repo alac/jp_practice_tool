@@ -252,4 +252,4 @@ if __name__ == "__main__":
     RAW_ROOT = r'data\raw'
     CHUNK_ROOT = r'data\chunk'
     chunk_data(RAW_ROOT, CHUNK_ROOT)
-    process_all_chunks(DATABASE_ROOT+"x", CHUNK_ROOT)
+    process_all_chunks(DATABASE_ROOT, CHUNK_ROOT)
