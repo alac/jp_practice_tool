@@ -4,6 +4,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pathlib import Path
 
+from library.ai_requests import run_ai_request_stream
 from library.anki_client import AnkiConnectClient
 from library.database_interface import DATABASE_ROOT
 from library.tts import generate_tts_audio_data
@@ -151,6 +152,62 @@ def tts():
         return jsonify({"audio_data": audio_base64})
     else:
         return jsonify({"error": "TTS generation failed"}), 50
+
+
+@app.route('/api/exercises/disambiguate/<word>', methods=['GET'])
+def get_disambiguate_exercise(word):
+    prompt = f"""
+Generate a disambiguation exercise for the Japanese word "{word}".
+Include a list of 3-4 Japanese words that are similar to "{word}" and their English definitions.
+Create a question that asks the user to match each Japanese word with its correct English definition.
+Present the definitions in a scrambled order.
+Return two sections:
+1. <task>Question in markdown format (including the word matching exercise)</task>
+2. <answer>Explanation in markdown format</answer>
+
+Example output format:
+
+<task>
+<question>
+**Match the Japanese words to their English definitions.**
+
+Words:
+1.  走る
+2.  駆ける
+3.  逃げる
+
+Definitions:
+A. To run away; to escape
+B. To run; to dash; to sprint
+C. To run; to travel (e.g., a vehicle); to flow (e.g., water, time); to elapse
+
+Match the words to the definitions (e.g., 1-B, 2-C, 3-A):
+</question>
+<answer>
+**Explanation:**
+
+*   走る (hashiru): Broadest sense of "run," including vehicles and flowing liquids.
+*   駆ける (kakeru):  Implies running quickly, dashing or sprinting.
+*   逃げる (nigeru): Specifically means "to run away" or "to escape."
+</answer>
+</task>
+
+"""
+    result_text = ""
+    for tok in run_ai_request_stream(prompt, ["</task>"], print_prompt=False, temperature=0.1, ban_eos_token=False, max_response=1000):
+        result_text += tok
+
+    task_start = result_text.find("<question>")
+    task_end = result_text.find("</question>")
+    answer_start = result_text.find("<answer>")
+    answer_end = result_text.find("</answer>")
+
+    if task_start != -1 and task_end != -1 and answer_start != -1 and answer_end != -1:
+        question = result_text[task_start + len("<question>"):task_end].strip()
+        explanation = result_text[answer_start + len("<answer>"):answer_end].strip()
+        return jsonify({"question": question, "explanation": explanation})
+    else:
+        return jsonify({"error": "Could not parse LLM response", "raw_response": result_text}), 500
 
 
 if __name__ == '__main__':

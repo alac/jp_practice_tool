@@ -2,18 +2,14 @@ import React, { useState, useEffect, useContext } from "react";
 import "./App.css";
 import { BaseURLContext } from "./context/BaseURLContext";
 import TabModeSentencesComponent from "./components/TabModeSentencesComponent";
-import { type } from "os";
+import TabModeDisambiguateComponent from "./components/TabModeDisambiguateComponent";
 
 interface Word {
   word: string;
   id: number;
 }
 
-type TabType =
-  | "sentences"
-  | "sentence-meaning"
-  | "word-meaning"
-  | "meaning-word";
+type TabType = "sentences" | "disambiguate";
 
 function App() {
   const baseURL = useContext(BaseURLContext);
@@ -279,22 +275,10 @@ function App() {
               Sentences
             </button>
             <button
-              className={currentTab === "sentence-meaning" ? "active" : ""}
-              onClick={() => handleTabChange("sentence-meaning")}
+              className={currentTab === "disambiguate" ? "active" : ""}
+              onClick={() => handleTabChange("disambiguate")}
             >
-              Sentence-&gt;Meaning
-            </button>
-            <button
-              className={currentTab === "word-meaning" ? "active" : ""}
-              onClick={() => handleTabChange("word-meaning")}
-            >
-              Word-&gt;Pick correct meaning
-            </button>
-            <button
-              className={currentTab === "meaning-word" ? "active" : ""}
-              onClick={() => handleTabChange("meaning-word")}
-            >
-              Meaning-&gt;Word
+              Disambiguate
             </button>
           </div>
 
@@ -302,30 +286,8 @@ function App() {
             {currentTab === "sentences" && selectedWord && (
               <TabModeSentencesComponent selectedWord={selectedWord} />
             )}
-            {currentTab === "sentence-meaning" && selectedWord && (
-              <div>
-                <h4>Sentence-&gt;Meaning (Tab Content Stub)</h4>
-                {selectedWord && words.length > 0 ? (
-                  <p>
-                    Example content for Sentence-&gt;Meaning for{" "}
-                    {selectedWord.word}
-                  </p>
-                ) : (
-                  <p>Select a word and have sentences to see content here.</p>
-                )}
-              </div>
-            )}
-            {currentTab === "word-meaning" && selectedWord && (
-              <div>
-                <h4>Word-&gt;Pick correct meaning (Tab Content Stub)</h4>
-                <p>Content for Word-&gt;Pick correct meaning tab</p>
-              </div>
-            )}
-            {currentTab === "meaning-word" && selectedWord && (
-              <div>
-                <h4>Meaning-&gt;Word (Tab Content Stub)</h4>
-                <p>Content for Meaning-&gt;Word tab</p>
-              </div>
+            {currentTab === "disambiguate" && selectedWord && (
+              <TabModeDisambiguateComponent selectedWord={selectedWord} />
             )}
           </div>
 
