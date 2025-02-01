@@ -46,7 +46,7 @@ const TabModeDisambiguateComponent = ({
   return (
     <div className="tab-mode-sentences">
       <h4>
-        Disambiguate Exercise for:
+        Disambiguate Exercise for:{" "}
         {selectedWord ? selectedWord.word : "Select a word"}
       </h4>
       {disambiguationExercise ? (
@@ -54,7 +54,7 @@ const TabModeDisambiguateComponent = ({
           <div className="markdown-content">
             <ReactMarkdown>{disambiguationExercise.question}</ReactMarkdown>
           </div>
-          <details>
+          <details key={selectedWord.word}>
             <summary>Show Explanation</summary>
             <div className="markdown-content">
               <ReactMarkdown>

@@ -177,18 +177,18 @@ Words:
 3.  逃げる
 
 Definitions:
-A. To run away; to escape
-B. To run; to dash; to sprint
-C. To run; to travel (e.g., a vehicle); to flow (e.g., water, time); to elapse
+- (A) To run away; to escape
+- (B) To run; to dash; to sprint
+- (C) To run; to travel (e.g., a vehicle); to flow (e.g., water, time); to elapse
 
 Match the words to the definitions (e.g., 1-B, 2-C, 3-A):
 </question>
 <answer>
 **Explanation:**
 
-*   走る (hashiru): Broadest sense of "run," including vehicles and flowing liquids.
-*   駆ける (kakeru):  Implies running quickly, dashing or sprinting.
-*   逃げる (nigeru): Specifically means "to run away" or "to escape."
+*   走る: Broadest sense of "run," including vehicles and flowing liquids.
+*   駆ける:  Implies running quickly, dashing or sprinting.
+*   逃げる: Specifically means "to run away" or "to escape."
 </answer>
 </task>
 

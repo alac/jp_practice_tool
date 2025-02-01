@@ -44,7 +44,7 @@ const TabModeSentencesComponent = ({
   return (
     <div className="tab-mode-sentences">
       <h4>
-        Sentences for {selectedWord ? selectedWord.word : "Select a word"}
+        Sentences for: {selectedWord ? selectedWord.word : "Select a word"}
       </h4>
       <ul className="sentence-list">
         {sentences.map((example, index) => (
