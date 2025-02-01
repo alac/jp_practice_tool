@@ -19,6 +19,7 @@ const TabModeDisambiguateComponent = ({
 
   useEffect(() => {
     if (selectedWord) {
+      setDisambiguationExercise(null);
       const fetchDisambiguateExercise = async () => {
         try {
           const response = await fetch(
@@ -44,7 +45,7 @@ const TabModeDisambiguateComponent = ({
   }, [selectedWord, baseURL]);
 
   return (
-    <div className="tab-mode-sentences">
+    <div className="tab-mode-sentences" key={selectedWord.word}>
       <h4>
         Disambiguate Exercise for:{" "}
         {selectedWord ? selectedWord.word : "Select a word"}
@@ -54,7 +55,7 @@ const TabModeDisambiguateComponent = ({
           <div className="markdown-content">
             <ReactMarkdown>{disambiguationExercise.question}</ReactMarkdown>
           </div>
-          <details key={selectedWord.word}>
+          <details>
             <summary>Show Explanation</summary>
             <div className="markdown-content">
               <ReactMarkdown>
