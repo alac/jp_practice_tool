@@ -6,3 +6,4 @@ tomli
 unidic
 flask
 flask-cors
+pydantic
